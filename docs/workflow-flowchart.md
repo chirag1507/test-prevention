@@ -1,0 +1,543 @@
+# CD-Agent Workflow Flowchart
+
+> Build the product right. Ship value fast. Learn continuously.
+
+## Overview
+
+This flowchart shows the complete CD-Agent development workflow, from feature inception to production deployment.
+
+---
+
+## 1. The Big Picture: CD as a Learning System
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           CONTINUOUS DELIVERY LEARNING LOOP                      │
+│                                                                                  │
+│  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐           │
+│  │      PLAN        │    │       DO         │    │      CHECK       │           │
+│  │                  │    │                  │    │                  │           │
+│  │  • User Story    │───▶│  • TDD Cycle     │───▶│  • Acceptance    │           │
+│  │    Mapping       │    │  • Build Feature │    │    Tests Pass?   │           │
+│  │  • Example       │    │  • Commit Stage  │    │  • Smoke Tests   │           │
+│  │    Mapping       │    │  • Deploy        │    │  • Metrics       │           │
+│  │  • Hypothesis    │    │                  │    │                  │           │
+│  └──────────────────┘    └──────────────────┘    └──────────────────┘           │
+│           ▲                                               │                      │
+│           │              ┌──────────────────┐             │                      │
+│           │              │       ACT        │             │                      │
+│           │              │                  │◀────────────┘                      │
+│           └──────────────│  • Pivot?        │                                    │
+│                          │  • Persevere?    │                                    │
+│                          │  • Kill?         │                                    │
+│                          └──────────────────┘                                    │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Project Initialization with Frontend Context
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                        PROJECT INITIALIZATION (/cd-init)                         │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+                              ┌────────────────────┐
+                              │  Select Project    │
+                              │      Type          │
+                              │                    │
+                              │ • backend          │
+                              │ • frontend         │
+                              │ • fullstack        │
+                              │ • system-tests     │
+                              └─────────┬──────────┘
+                                        │
+                     ┌──────────────────┴──────────────────┐
+                     │                                     │
+                 ▼                                     ▼
+      ┌──────────────────────┐           ┌──────────────────────────┐
+      │   Backend Project    │           │ Frontend/Fullstack/      │
+      │                      │           │    System Tests          │
+      └─────────┬────────────┘           │                          │
+                │                        │  → Standard setup flow   │
+                ▼                        └──────────────────────────┘
+ ┌─────────────────────────┐
+ │ Does frontend exist?    │
+ │                         │
+ │ A) No - building both   │──→ Suggest /cd-init fullstack
+ │ B) Yes - I have access  │──→ Continue ↓
+ │ C) Yes - third-party    │──→ Note API requirements, skip FE setup
+ │ D) Not sure yet         │──→ Skip FE setup, can add later (Step 1.3)
+ └─────────┬───────────────┘
+           │ (if B)
+           ▼
+ ┌───────────────────────────────────────────┐
+ │ Is frontend in VSCode workspace?          │
+ │                                           │
+ │ 💡 RECOMMENDATION:                        │
+ │ Adding FE to workspace improves:          │
+ │ • API call analysis                       │
+ │ • Data structure understanding            │
+ │ • Contract generation                     │
+ │ • Context-aware suggestions               │
+ └─────────┬─────────────────────────────────┘
+           │
+    ┌──────┴────────────────────┐
+    │                           │
+    ▼                           ▼
+┌────────────────┐    ┌──────────────────────────┐
+│ YES - Frontend │    │ NO - Provide reference   │
+│ in workspace   │    │      materials           │
+└────────┬───────┘    └──────────┬───────────────┘
+         │                       │
+         │              ┌────────┴────────────────────────┐
+         │              │                                 │
+         │              ▼                                 ▼
+         │   ┌────────────────────┐         ┌─────────────────────────┐
+         │   │ Screenshots/Designs│         │ Contracts/API Specs     │
+         │   │                    │         │                         │
+         │   │ → Store in docs/   │         │ → Store in docs/        │
+         │   │   frontend-        │         │   frontend-             │
+         │   │   reference/       │         │   reference/contracts/  │
+         │   │   screenshots/     │         │                         │
+         │   └────────┬───────────┘         │ • Pact contracts        │
+         │            │                     │ • OpenAPI/Swagger       │
+         │            │                     │ • API documentation     │
+         │            │                     └─────────┬───────────────┘
+         │            │                               │
+         │            │              ┌────────────────┴──────────────┐
+         │            │              │                               │
+         │            │              ▼                               ▼
+         │            │   ┌───────────────────────┐    ┌─────────────────────────┐
+         │            │   │ FE has Pact contracts │    │ FE without Pact         │
+         │            │   │ (Scenario A)          │    │ (Scenario B)            │
+         │            │   │                       │    │                         │
+         │            │   │ → Import to broker    │    │ → Retrofit Pact tests   │
+         │            │   │ → Implement backend   │    │   in FE first           │
+         │            │   │   to satisfy          │    │ → Generate contracts    │
+         │            │   └───────────────────────┘    │ → Then build backend    │
+         │            │                                └─────────────────────────┘
+         │            │
+         └────────────┴────────────────────────────────────┐
+                                                           │
+                                                           ▼
+                                      ┌─────────────────────────────────────┐
+                                      │  Backend Project Initialized with:  │
+                                      │                                     │
+                                      │  ✓ Project structure                │
+                                      │  ✓ Dependencies installed           │
+                                      │  ✓ Frontend context available       │
+                                      │    (in workspace OR references)     │
+                                      │  ✓ Ready for feature planning       │
+                                      └─────────────────────────────────────┘
+
+NOTE: Post-initialization, can always add FE reference using Step 1.3:
+  1. mkdir docs/frontend-reference/{screenshots,contracts/pact}
+  2. Add FE to workspace OR copy reference materials
+  3. Tell agent "I've added frontend reference materials"
+```
+
+---
+
+## 3. Feature Implementation Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              FEATURE IMPLEMENTATION                              │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+     ┌────────────────────────────────────────────────────────────────────────┐
+     │  PHASE 0: UNDERSTAND                                                   │
+     │                                                                        │
+     │  ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐  │
+     │  │ User Story Map  │────▶│ Example Mapping │────▶│   Behavioral    │  │
+     │  │                 │     │                 │     │   Analysis      │  │
+     │  │ • Activities    │     │ 🟡 Story        │     │                 │  │
+     │  │ • User Tasks    │     │ 🟢 Examples     │     │ Document ALL    │  │
+     │  │ • Stories       │     │ 🔴 Rules        │     │ variants        │  │
+     │  │                 │     │ 🔵 Questions    │     │                 │  │
+     │  └─────────────────┘     └─────────────────┘     └────────┬────────┘  │
+     │                                                           │           │
+     └───────────────────────────────────────────────────────────┼───────────┘
+                                                                 │
+                                                                 ▼
+                                                    ┌────────────────────────┐
+                                                    │    🚦 GATE 0          │
+                                                    │    Human Approval      │
+                                                    │    of Behaviors        │
+                                                    └───────────┬────────────┘
+                                                                │
+     ┌──────────────────────────────────────────────────────────┼────────────┐
+     │  PHASE 1: SYSTEM TEST DEFINITION                         │            │
+     │                                                          ▼            │
+     │  ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐  │
+     │  │ Write Gherkin   │────▶│  Create DSL     │────▶│  Define Models  │  │
+     │  │ Features        │     │  Layer          │     │                 │  │
+     │  │                 │     │                 │     │                 │  │
+     │  │ Given-When-Then │     │ Technology      │     │ Test Data       │  │
+     │  │ scenarios       │     │ agnostic        │     │ structures      │  │
+     │  └─────────────────┘     └─────────────────┘     └────────┬────────┘  │
+     │                                                           │           │
+     └───────────────────────────────────────────────────────────┼───────────┘
+                                                                 │
+                                                                 ▼
+                                                    ┌────────────────────────┐
+                                                    │    🚦 GATE 1          │
+                                                    │    Feature + DSL      │
+                                                    │    Approved           │
+                                                    └───────────┬────────────┘
+                                                                │
+     ┌──────────────────────────────────────────────────────────┼────────────┐
+     │  PHASE 2: BACKEND IMPLEMENTATION (with TDD)              │            │
+     │                                                          ▼            │
+     │  ┌─────────────────────────────────────────────────────────────────┐  │
+     │  │                    TDD CYCLE (per behavior)                     │  │
+     │  │  ┌─────────┐      ┌─────────┐      ┌──────────┐                 │  │
+     │  │  │   RED   │─────▶│  GREEN  │─────▶│ REFACTOR │──┐              │  │
+     │  │  │  Write  │      │  Make   │      │ Improve  │  │              │  │
+     │  │  │ failing │      │  test   │      │  code    │  │              │  │
+     │  │  │  test   │      │  pass   │      │structure │  │              │  │
+     │  │  └─────────┘      └─────────┘      └──────────┘  │              │  │
+     │  │       ▲                                          │              │  │
+     │  │       └──────────────────────────────────────────┘              │  │
+     │  └─────────────────────────────────────────────────────────────────┘  │
+     │                                                                       │
+     │  Test Layers (inside-out):                                            │
+     │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐              │
+     │  │ Sociable Unit │─▶│   Narrow      │─▶│  Component    │              │
+     │  │    Tests      │  │ Integration   │  │    Tests      │              │
+     │  │               │  │    Tests      │  │               │              │
+     │  │ Use Case +    │  │               │  │ HTTP API      │              │
+     │  │ Domain        │  │ Repository +  │  │ Full slice    │              │
+     │  │               │  │ Real DB       │  │               │              │
+     │  └───────────────┘  └───────────────┘  └───────┬───────┘              │
+     │                                                │                      │
+     └────────────────────────────────────────────────┼──────────────────────┘
+                                                      │
+                                                      ▼
+                                         ┌────────────────────────┐
+                                         │    🚦 GATE 2          │
+                                         │    Backend Review      │
+                                         └───────────┬────────────┘
+                                                     │
+     ┌───────────────────────────────────────────────┼───────────────────────┐
+     │  PHASE 3: FRONTEND IMPLEMENTATION (with TDD)  │                       │
+     │                                               ▼                       │
+     │  ┌─────────────────────────────────────────────────────────────────┐  │
+     │  │                    TDD CYCLE (per component)                    │  │
+     │  │  ┌─────────┐      ┌─────────┐      ┌──────────┐                 │  │
+     │  │  │   RED   │─────▶│  GREEN  │─────▶│ REFACTOR │──┐              │  │
+     │  │  └─────────┘      └─────────┘      └──────────┘  │              │  │
+     │  │       ▲                                          │              │  │
+     │  │       └──────────────────────────────────────────┘              │  │
+     │  └─────────────────────────────────────────────────────────────────┘  │
+     │                                                                       │
+     │  Test Layers:                                                         │
+     │  ┌───────────────┐  ┌───────────────┐                                 │
+     │  │  Component    │─▶│   Contract    │                                 │
+     │  │    Tests      │  │    Tests      │                                 │
+     │  │               │  │   (Pact)      │                                 │
+     │  │ UI behavior   │  │               │                                 │
+     │  │ data-testid   │  │ API contracts │                                 │
+     │  └───────────────┘  └───────┬───────┘                                 │
+     │                             │                                         │
+     └─────────────────────────────┼─────────────────────────────────────────┘
+                                   │
+                                   ▼
+                      ┌────────────────────────┐
+                      │    🚦 GATE 3          │
+                      │    Frontend Review     │
+                      └───────────┬────────────┘
+                                  │
+     ┌────────────────────────────┼──────────────────────────────────────────┐
+     │  PHASE 4: CONTRACT VERIFICATION                                       │
+     │                            ▼                                          │
+     │  ┌─────────────────────────────────────────────────────────────────┐  │
+     │  │  Provider Contract Tests (Backend)                              │  │
+     │  │                                                                 │  │
+     │  │  • Fetch contracts from Pact Broker                             │  │
+     │  │  • Verify backend honors consumer expectations                  │  │
+     │  │  • State handlers prepare test scenarios                        │  │
+     │  └─────────────────────────────────────────────────────────────────┘  │
+     │                                                                       │
+     └───────────────────────────────────────────────┬───────────────────────┘
+                                                     │
+                                                     ▼
+                                        ┌────────────────────────┐
+                                        │    🚦 GATE 4          │
+                                        │    Contracts Verified  │
+                                        └───────────┬────────────┘
+                                                    │
+     ┌──────────────────────────────────────────────┼────────────────────────┐
+     │  PHASE 5: SYSTEM TEST IMPLEMENTATION         │                        │
+     │                                              ▼                        │
+     │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐       │
+     │  │ Step            │─▶│ Driver          │─▶│ Page Objects    │       │
+     │  │ Definitions     │  │ Interfaces      │  │ (Playwright)    │       │
+     │  │                 │  │                 │  │                 │       │
+     │  │ Maps Gherkin    │  │ Technology      │  │ data-testid     │       │
+     │  │ to DSL          │  │ contracts       │  │ selectors       │       │
+     │  └─────────────────┘  └─────────────────┘  └────────┬────────┘       │
+     │                                                     │                │
+     └─────────────────────────────────────────────────────┼────────────────┘
+                                                           │
+                                                           ▼
+                                              ┌────────────────────────┐
+                                              │    🚦 GATE 5          │
+                                              │    System Tests Pass   │
+                                              └───────────┬────────────┘
+                                                          │
+                                                          ▼
+                                              ┌────────────────────────┐
+                                              │    ✅ READY TO         │
+                                              │       COMMIT           │
+                                              └────────────────────────┘
+```
+
+---
+
+## 4. TDD Cycle Detail
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                               TDD CYCLE DETAIL                                   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+                              ┌──────────────────┐
+                              │  Pick ONE        │
+                              │  Behavior        │
+                              └────────┬─────────┘
+                                       │
+                                       ▼
+              ┌─────────────────────────────────────────────────┐
+              │                                                 │
+              │    ┌───────────────────────────────────────┐    │
+              │    │              🔴 RED                   │    │
+              │    │                                       │    │
+              │    │  1. Write ONE failing test            │    │
+              │    │  2. Test must fail for RIGHT reason   │    │
+              │    │  3. Run test → see it FAIL            │    │
+              │    │                                       │    │
+              │    │  ❌ Don't: Write multiple tests       │    │
+              │    │  ❌ Don't: Write implementation first │    │
+              │    └───────────────────┬───────────────────┘    │
+              │                        │                        │
+              │                        ▼                        │
+              │    ┌───────────────────────────────────────┐    │
+              │    │              🟢 GREEN                 │    │
+              │    │                                       │    │
+              │    │  1. Write MINIMAL code to pass        │    │
+              │    │  2. No anticipatory coding            │    │
+              │    │  3. Run test → see it PASS            │    │
+              │    │                                       │    │
+              │    │  ❌ Don't: Add extra features         │    │
+              │    │  ❌ Don't: Optimize prematurely       │    │
+              │    └───────────────────┬───────────────────┘    │
+              │                        │                        │
+              │                        ▼                        │
+              │    ┌───────────────────────────────────────┐    │
+              │    │            🔵 REFACTOR                │    │
+              │    │                                       │    │
+              │    │  1. Improve code structure            │    │
+              │    │  2. Remove duplication                │    │
+              │    │  3. Tests must stay GREEN             │    │
+              │    │                                       │    │
+              │    │  ❌ Don't: Add new behavior           │    │
+              │    │  ❌ Don't: Refactor with red tests    │    │
+              │    └───────────────────┬───────────────────┘    │
+              │                        │                        │
+              └────────────────────────┼────────────────────────┘
+                                       │
+                                       ▼
+                              ┌──────────────────┐
+                              │  More behaviors? │
+                              └────────┬─────────┘
+                                       │
+                          ┌────────────┴────────────┐
+                          │                         │
+                         YES                        NO
+                          │                         │
+                          ▼                         ▼
+                  ┌──────────────┐         ┌──────────────┐
+                  │ Pick next    │         │    Done!     │
+                  │ behavior     │         │   Commit     │
+                  └──────────────┘         └──────────────┘
+```
+
+---
+
+## 5. CI/CD Pipeline Flow
+
+> **💡 Tip**: Use `/commit-stage`, `/release-stage`, and `/acceptance-stage` commands to automate setup of these workflows in your project.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              CI/CD PIPELINE FLOW                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+    Developer Machine                              GitHub Actions
+    ─────────────────                              ──────────────────────────────
+
+    ┌─────────────┐
+    │   Commit    │
+    │   & Push    │
+    └──────┬──────┘
+           │
+           │ push to main / PR
+           │
+           ▼
+    ┌──────────────────────────────────────────────────────────────────────────┐
+    │                          COMMIT STAGE                                     │
+    │  (per component: Frontend, Backend, each microservice)                    │
+    │                                                                           │
+    │  ┌──────────┬──────────┬──────────┬──────────┬──────────┐                │
+    │  │ Compile  │  Unit    │ Contract │Integrat° │Component │                │
+    │  │          │  Tests   │  Verify  │  Tests   │  Tests   │                │
+    │  └──────────┴──────────┴──────────┴──────────┴──────────┘                │
+    │                                │                                          │
+    │                       (all pass on main)                                  │
+    │                                ▼                                          │
+    │                    ┌─────────────────────┐                                │
+    │                    │ Docker Build        │                                │
+    │                    │ Publish to GHCR     │                                │
+    │                    │ (tagged: commit SHA)│                                │
+    │                    └─────────────────────┘                                │
+    └──────────────────────────────────────────────────────────────────────────┘
+                                     │
+                      (manual trigger with commit SHAs)
+                                     ▼
+    ┌──────────────────────────────────────────────────────────────────────────┐
+    │                          RELEASE STAGE                                    │
+    │                                                                           │
+    │  ┌────────────────────────────────────────────────────────────────────┐  │
+    │  │ 1. Pact: can-i-deploy?                                             │  │
+    │  │    Check contracts are verified for target environment             │  │
+    │  └────────────────────────────────────────────────────────────────────┘  │
+    │                                │                                          │
+    │                               YES                                         │
+    │                                ▼                                          │
+    │  ┌────────────────────────────────────────────────────────────────────┐  │
+    │  │ 2. Deploy to Environment (QA / UAT)                                │  │
+    │  │    SSH → docker compose up                                         │  │
+    │  └────────────────────────────────────────────────────────────────────┘  │
+    │                                │                                          │
+    │                                ▼                                          │
+    │  ┌────────────────────────────────────────────────────────────────────┐  │
+    │  │ 3. Record Deployment                                               │  │
+    │  │    • Pact Broker: record-deployment                                │  │
+    │  │    • State file: <env>-deployed-versions.json                      │  │
+    │  └────────────────────────────────────────────────────────────────────┘  │
+    │                                │                                          │
+    │                                ▼                                          │
+    │  ┌────────────────────────────────────────────────────────────────────┐  │
+    │  │ 4. Smoke Tests                                                     │  │
+    │  │    Health checks, basic connectivity                               │  │
+    │  └────────────────────────────────────────────────────────────────────┘  │
+    └──────────────────────────────────────────────────────────────────────────┘
+                                     │
+                        (scheduled every 15 minutes)
+                                     ▼
+    ┌──────────────────────────────────────────────────────────────────────────┐
+    │                       ACCEPTANCE STAGE                                    │
+    │                                                                           │
+    │  ┌────────────────────────────────────────────────────────────────────┐  │
+    │  │ Version Check:                                                     │  │
+    │  │                                                                    │  │
+    │  │   deployed-versions.json  ──┐                                      │  │
+    │  │                             ├──▶ Same? ──▶ Skip (already tested)   │  │
+    │  │   last-tested-versions.json─┘                                      │  │
+    │  │                             │                                      │  │
+    │  │                           Different?                               │  │
+    │  │                             │                                      │  │
+    │  │                             ▼                                      │  │
+    │  │   ┌─────────────────────────────────────────────────────────────┐  │  │
+    │  │   │ Run Tests:                                                  │  │  │
+    │  │   │  1. Backend Connectivity                                    │  │  │
+    │  │   │  2. Smoke Tests                                             │  │  │
+    │  │   │  3. Acceptance Tests (Cucumber + Playwright)                │  │  │
+    │  │   └─────────────────────────────────────────────────────────────┘  │  │
+    │  │                             │                                      │  │
+    │  │                         (on success)                               │  │
+    │  │                             ▼                                      │  │
+    │  │   Update: last-successfully-tested-versions.json                   │  │
+    │  └────────────────────────────────────────────────────────────────────┘  │
+    └──────────────────────────────────────────────────────────────────────────┘
+                                     │
+                            (manual promotion)
+                                     ▼
+                          ┌─────────────────────┐
+                          │     PRODUCTION      │
+                          │    (same flow)      │
+                          └─────────────────────┘
+```
+
+---
+
+## 6. Test Pyramid Quick Reference
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              MODERN TEST PYRAMID                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+    SYSTEM LEVEL (separate repo: <project>-system-tests)
+    ═══════════════════════════════════════════════════
+
+                           ┌─────────────────┐
+                           │   Smoke Tests   │  Production health
+                           ├─────────────────┤
+                           │   E2E Tests     │  Critical journeys
+                    ┌──────┴─────────────────┴──────┐
+                    │ Acceptance │ External System  │
+                    │   Tests    │ Contract Tests   │
+                    └──────────────────────────────┘
+
+
+    COMPONENT LEVEL (same repo as code)
+    ═══════════════════════════════════
+
+                    ┌──────────────────────────────┐
+                    │ Component  │   Contract      │
+                    │   Tests    │    Tests        │
+                    ├──────────────────────────────┤
+                    │      Sociable Unit Tests     │
+                    ├──────────────────────────────┤
+                    │   Narrow Integration Tests   │
+                    └──────────────────────────────┘
+```
+
+---
+
+## 7. Commands Quick Reference
+
+| Phase | Command | Purpose |
+|-------|---------|---------|
+| Strategy | `/vision` | Define product vision and goals |
+| Discovery | `/plan` | Break feature into TDD-ready tasks |
+| Exploration | `/spike` | Technical exploration (throwaway) |
+| ATDD | `/acceptance-test` | Write Executable Specification |
+| ATDD | `/dsl` | Implement DSL layer |
+| ATDD | `/driver` | Implement Protocol Driver |
+| TDD | `/red` | Write ONE failing test |
+| TDD | `/green` | Minimal implementation |
+| TDD | `/refactor` | Improve structure |
+| TDD | `/cycle` | Automated red-green-refactor |
+| Ship | `/commit` | Conventional commit |
+| Ship | `/ship` | Merge to main |
+| Quality | `/code-review` | Domain review |
+| CI/CD | `/commit-stage` | Set up commit stage workflow |
+| CI/CD | `/release-stage` | Set up release stage workflow |
+| CI/CD | `/acceptance-stage` | Set up acceptance stage workflow |
+
+---
+
+## 8. XP Values Reminder
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  Communication │ Simplicity │ Feedback │ Courage │ Respect │ Humility │ Empathy │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+Every decision, every line of code, every test should reflect these values.

@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /home/av19/Projects/cd-agent/bin/cli.js session-start"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "cd-agent": {
+      "command": "/home/av19/Projects/cd-agent/dist/cd-agent"
+    }
+  }
+}

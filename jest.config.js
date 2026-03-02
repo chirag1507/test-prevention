@@ -1,8 +1,8 @@
 export default {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  roots: ['<rootDir>/src'],
-  testMatch: ['**/__tests__/**/*.test.ts', '**/*.spec.ts'],
+  roots: ['<rootDir>/src', '<rootDir>/system-tests'],
+  testMatch: ['**/__tests__/**/*.test.ts', '**/*.spec.ts', '**/system-tests/**/*.test.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
@@ -21,6 +21,7 @@ export default {
       useESM: true,
       tsconfig: {
         module: 'ES2020',
+        rootDir: '.',
       },
     }],
   },

@@ -1,7 +1,10 @@
 {
   "mcpServers": {
     "cd-agent": {
-      "command": "/home/av19/Projects/cd-agent/dist/cd-agent"
+      "command": "/home/av19/Projects/cd-agent/dist/cd-agent",
+      "env": {
+        "DEV_LICENSE_KEYS": "dev-pro-local"
+      }
     }
   }
 }
